@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Para Mi Persona Especial ❤</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- FUENTE CAMBIADA -->
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sour+Gummy:ital,wght@0,100..900;1,100..900&display=swap"
+        rel="stylesheet">
+    <!-- Iconos para el reproductor -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- CSS externo -->
+    <link rel="stylesheet" href="assets/css/styles.css">
+
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>❤️</text></svg>">
+</head>
+
+<body>
+
+    <div class="love-container">
+        <div class="counter-container">
+            <p>Nuestro tiempo juntos...</p>
+            <div id="love-counter"></div>
+        </div>
+
+        <div class="tree-container">
+            <div class="full-tree-wrapper">
+                <div class="heart-canopy"></div>
+                <div class="tree-image-wrapper">
+                    <img id="love-tree-img"
+                        src="https://www.dl.dropboxusercontent.com/scl/fi/h12iesgregm60chzzsns1/tree.png?rlkey=zx94aiz5oedyws10jyg9thj92&st=rfz3f9on"
+                        alt="Tronco de árbol">
+                </div>
+                <img src="https://www.dl.dropboxusercontent.com/scl/fi/v4bqs1uuaff8nno4zt0kd/bears.png?rlkey=jp9rq8255blkseqz25k0sjjjp&st=qg7wwu9i"
+                    alt="Osos Abrazados" class="signature-bears-mobile">
+            </div>
+            <img src="https://www.dl.dropboxusercontent.com/scl/fi/v4bqs1uuaff8nno4zt0kd/bears.png?rlkey=jp9rq8255blkseqz25k0sjjjp&st=qg7wwu9i"
+                alt="Osos Abrazados" class="signature-bears-desktop">
+        </div>
+
+        <div class="text-container">
+            <div class="love-message" id="love-message-text"></div>
+        </div>
+
+        <div class="carousel-perspective-wrapper">
+            <div class="carousel-container-3d">
+                <!-- CARRUSEL REDUCIDO A 6 IMÁGENES -->
+                <div class="carousel-3d" id="imageCarousel">
+                    <div class="carousel-item-3d">
+                        <img src="assets/gifs/1.gif" alt="Recuerdo 1">
+                    </div>
+                    <div class="carousel-item-3d">
+                        <img src="assets/gifs/2.gif" alt="Recuerdo 2">
+                    </div>
+                    <div class="carousel-item-3d">
+                        <img src="assets/gifs/3.gif" alt="Recuerdo 3">
+                    </div>
+                    <div class="carousel-item-3d">
+                        <img src="assets/gifs/4.gif" alt="Recuerdo 4">
+                    </div>
+                    <div class="carousel-item-3d">
+                        <img src="assets/gifs/5.gif" alt="Recuerdo 5">
+                    </div>
+                    <div class="carousel-item-3d">
+                        <img src="assets/gifs/6.gif" alt="Recuerdo 6">
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <!-- Botón de música -->
+    <div class="music-button" id="music-button" title="Reproducir música">
+        <i class="fas fa-music"></i>
+    </div>
+
+    <!-- Reproductor de música -->
+    <div class="music-player" id="music-player">
+        <div class="player-header">
+            <h3><i class="fas fa-headphones"></i> Nuestra Música</h3>
+            <button class="close-player" id="close-player">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <div class="player-content">
+            <!-- Lista de canciones -->
+            <div class="playlist" id="playlist">
+                <!-- Las canciones se cargarán aquí con JavaScript -->
+            </div>
+
+            <!-- Controles del reproductor -->
+            <div class="player-controls">
+                <div class="song-info">
+                    <div class="song-title" id="current-song-title">Selecciona una canción</div>
+                    <div class="song-artist" id="current-song-artist"></div>
+                </div>
+
+                <div class="progress-container">
+                    <div class="progress-bar" id="progress-bar">
+                        <div class="progress" id="progress"></div>
+                    </div>
+                    <div class="time-display">
+                        <span id="current-time">0:00</span>
+                        <span id="duration">0:00</span>
+                    </div>
+                </div>
+
+                <div class="control-buttons">
+                    <button class="control-btn" id="prev-btn" title="Anterior">
+                        <i class="fas fa-step-backward"></i>
+                    </button>
+                    <button class="control-btn play-btn" id="play-btn" title="Reproducir">
+                        <i class="fas fa-play" id="play-icon"></i>
+                    </button>
+                    <button class="control-btn" id="next-btn" title="Siguiente">
+                        <i class="fas fa-step-forward"></i>
+                    </button>
+                    <button class="control-btn" id="volume-btn" title="Volumen">
+                        <i class="fas fa-volume-up" id="volume-icon"></i>
+                    </button>
+                    <div class="volume-slider-container">
+                        <input type="range" id="volume-slider" min="0" max="100" value="70" class="volume-slider">
+                    </div>
+                </div>
+
+                <div class="extra-controls">
+                    <button class="extra-btn" id="shuffle-btn" title="Aleatorio">
+                        <i class="fas fa-random"></i>
+                    </button>
+                    <button class="extra-btn" id="repeat-btn" title="Repetir">
+                        <i class="fas fa-redo"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="assets/js/main.js"></script>
+</body>
+
+</html>
