@@ -4,7 +4,6 @@
 const CONFIG = {
     startDate: '2025-09-06T19:30:00-05:00',
 
-
     // MENSAJE CAMBIADO Y GENERALIZADO
     loveText: `Hola, mi amor... ✨\nSolo quería recordarte lo especial que eres para mí y celebrar cada segundo que hemos compartido. Nuestro tiempo juntos ha sido un regalo maravilloso, lleno de risas, sueños y momentos que guardaré por siempre en mi corazón. ❤️\n\nCada día a tu lado es una nueva aventura y una razón para sonreír. Eres la luz que ilumina mis días. Gracias por tanto amor. ¡Te quiero muchísimo! 🥰`,
 
@@ -27,194 +26,108 @@ const CONFIG = {
     clickBurst: { distance: { min: 60, max: 90 }, wind: { min: 250, max: 450 }, },
     petal: { colors: ['#ffc2d1', '#ffb3c6', '#ff8fab'], frequency: 1000, duration: { min: 8, max: 12 }, },
     initialDelay: 800,
-    typingSpeed: 45, // Un poco más lento para la nueva fuente
+    typingSpeed: 45,
+
+    // Configuración de la pantalla de carga
+    loading: {
+        minDisplayTime: 3000,
+        progressSteps: [
+            { step: 0, message: "Inicializando..." },
+            { step: 10, message: "Cargando corazones..." },
+            { step: 30, message: "Preparando árbol especial..." },
+            { step: 50, message: "Configurando música..." },
+            { step: 70, message: "Cargando recuerdos..." },
+            { step: 90, message: "Finalizando..." },
+            { step: 100, message: "¡Listo!" }
+        ]
+    }
 };
 
-// class MusicSystem {
-//     constructor() {
-//         this.audio = null; this.isPlaying = false; this.clickCount = 0;
-//         this.button = document.getElementById('music-button'); this.init();
-//     }
-//     init() {
-//         this.button.addEventListener('click', () => this.toggleMusic());
-//         document.addEventListener('click', () => this.handleFirstClick());
-//         document.addEventListener('touchstart', () => this.handleFirstClick());
-//     }
-//     async handleFirstClick() {
-//         this.clickCount++; if (this.clickCount === 1) await this.initAudio();
-//     }
-//     async initAudio() {
-//         try {
-//             this.audio = new Audio('https://www.dl.dropboxusercontent.com/scl/fi/9aprlwe70zexkb95bfmfx/sound.mp3?rlkey=o3hfblu0a5pr5fv2yr57sydq7&st=ssqwqt3h'); this.audio.loop = true; this.audio.volume = 0.7; this.audio.preload = 'auto';
-//             this.audio.addEventListener('error', (e) => { this.button.style.display = 'none'; });
-//             setTimeout(() => { this.playMusic(); }, 1000);
-//         } catch (error) { this.button.style.display = 'none'; }
-//     }
-//     async toggleMusic() { if (this.isPlaying) this.pauseMusic(); else await this.playMusic(); }
-//     async playMusic() {
-//         if (!this.audio) return; try { await this.audio.play(); this.isPlaying = true; this.button.textContent = '🎵'; this.button.classList.add('playing'); } catch (error) { }
-//     }
-//     pauseMusic() { if (!this.audio) return; this.audio.pause(); this.isPlaying = false; this.button.textContent = '🎵'; this.button.classList.remove('playing'); }
-// }
+/************************************/
+/*     SISTEMA DE PANTALLA DE CARGA */
+/************************************/
+class LoadingSystem {
+    constructor() {
+        this.loadingScreen = document.getElementById('loading-screen');
+        this.progressFill = document.getElementById('progress-fill');
+        this.percentage = document.getElementById('loading-percentage');
+        this.message = document.getElementById('loading-message');
+        this.startTime = Date.now();
+        this.currentProgress = 0;
+        this.targetProgress = 0;
+        this.stepIndex = 0;
+        this.isHidden = false;
 
-function initCarousel() {
-    const carousel = document.getElementById('imageCarousel'); if (!carousel) return;
-    const items = carousel.querySelectorAll('.carousel-item-3d');
-    let radius, isDragging = false, startX = 0, currentRotation = 0, targetRotation = 0, autoRotateTimeout, animationFrameId;
-    const angle = 360 / items.length;
+        // Inicializar progreso
+        this.updateProgress(0, CONFIG.loading.progressSteps[0].message);
+    }
 
-    // ----- RADIO DEL CARRUSEL MODIFICADO PARA ALEJARLO -----
-    const updateRadius = () => {
-        if (window.innerWidth <= 480) { radius = 200; } // Más pequeño en móvil
-        else if (window.innerWidth <= 850) { radius = 250; } // Mediano
-        else { radius = 300; } // Grande
-    };
+    updateProgress(progress, message = null) {
+        this.targetProgress = Math.min(progress, 100);
 
-    const arrangeItems = () => { updateRadius(); items.forEach((item, index) => { item.style.transform = `rotateY(${angle * index}deg) translateZ(${radius}px)`; }); };
-    const dragStart = (e) => { isDragging = true; startX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX; carousel.style.transition = 'none'; };
-    const dragging = (e) => {
-        if (!isDragging) return; const currentX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
-        const diffX = currentX - startX; const sensitivity = window.innerWidth <= 850 ? 0.7 : 0.5;
-        targetRotation = currentRotation + diffX * sensitivity; carousel.style.transform = `rotateY(${targetRotation}deg)`;
-    };
-    const dragEnd = () => { if (!isDragging) return; isDragging = false; carousel.style.transition = 'transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275)'; currentRotation = targetRotation; startAutoRotate(); };
-    const animateRotation = () => {
-        if (isDragging) { animationFrameId = requestAnimationFrame(animateRotation); return; }
-        const rotationSpeed = 0.2; targetRotation -= rotationSpeed; currentRotation -= rotationSpeed;
-        carousel.style.transform = `rotateY(${targetRotation}deg)`; animationFrameId = requestAnimationFrame(animateRotation);
-    };
-    const stopAutoRotate = () => { if (animationFrameId) cancelAnimationFrame(animationFrameId); clearTimeout(autoRotateTimeout); };
-    const startAutoRotate = () => { stopAutoRotate(); animationFrameId = requestAnimationFrame(animateRotation); };
-    carousel.addEventListener('mousedown', dragStart); document.addEventListener('mousemove', dragging); document.addEventListener('mouseup', dragEnd);
-    carousel.addEventListener('touchstart', dragStart, { passive: true }); carousel.addEventListener('touchmove', dragging, { passive: true }); carousel.addEventListener('touchend', dragEnd);
-    arrangeItems(); startAutoRotate(); window.addEventListener('resize', arrangeItems);
+        // Actualizar mensaje si se proporciona
+        if (message) {
+            this.message.textContent = message;
+        }
+
+        // Animar progreso
+        this.animateProgress();
+    }
+
+    animateProgress() {
+        const animate = () => {
+            if (this.currentProgress < this.targetProgress) {
+                this.currentProgress += 0.5;
+                this.progressFill.style.width = `${this.currentProgress}%`;
+                this.percentage.textContent = `${Math.round(this.currentProgress)}%`;
+
+                // Actualizar mensaje según el progreso
+                const currentStep = CONFIG.loading.progressSteps.find(step =>
+                    this.currentProgress >= step.step &&
+                    (this.stepIndex < CONFIG.loading.progressSteps.length - 1 ||
+                        this.currentProgress >= step.step)
+                );
+
+                if (currentStep && currentStep.step > CONFIG.loading.progressSteps[this.stepIndex].step) {
+                    this.message.textContent = currentStep.message;
+                    this.stepIndex++;
+                }
+
+                requestAnimationFrame(animate);
+            } else if (this.currentProgress >= 100 && !this.isHidden) {
+                // Verificar tiempo mínimo de visualización
+                const elapsedTime = Date.now() - this.startTime;
+                if (elapsedTime >= CONFIG.loading.minDisplayTime) {
+                    this.hide();
+                } else {
+                    setTimeout(() => this.hide(), CONFIG.loading.minDisplayTime - elapsedTime);
+                }
+            }
+        };
+
+        requestAnimationFrame(animate);
+    }
+
+    hide() {
+        if (this.isHidden) return;
+
+        this.isHidden = true;
+        this.loadingScreen.classList.add('hidden');
+
+        // Remover del DOM después de la animación
+        setTimeout(() => {
+            if (this.loadingScreen.parentNode) {
+                this.loadingScreen.parentNode.removeChild(this.loadingScreen);
+            }
+        }, 800);
+    }
 }
 
-document.addEventListener('DOMContentLoaded', function () {
-    const canopy = document.querySelector('.heart-canopy');
-    const messageElement = document.getElementById('love-message-text');
-    const totalHearts = window.innerWidth <= 768 ? CONFIG.canopyHeartCount.mobile : CONFIG.canopyHeartCount.desktop;
-    const startDate = new Date(CONFIG.startDate);
-    console.log('CONFIG.startDate:', CONFIG.startDate);
-    console.log('startDate (toString):', startDate.toString());
-    console.log('startDate (ISO):', startDate.toISOString());
-    console.log('Ahora (toString):', new Date().toString());
-    let phraseIndex = 0;
-    console.log('Inicializando MusicPlayer...');
-    const musicPlayer = new MusicPlayer();
-    // new MusicSystem();
-    window.musicPlayer = musicPlayer;
-    console.log('MusicPlayer disponible en window.musicPlayer');
-
-    // Añadir evento para cargar automáticamente la primera canción cuando el usuario interactúe
-    document.addEventListener('click', function initAudioOnInteraction() {
-        console.log('Interacción del usuario detectada');
-        document.removeEventListener('click', initAudioOnInteraction);
-    }, { once: true });
-    function pluralize(value, singular, plural) { return `${value} ${value === 1 ? singular : plural}`; }
-
-    function updateCounter() {
-        const now = new Date(); const diff = now - startDate; const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-        const hours = Math.floor(diff / (1000 * 60 * 60)) % 24; const minutes = Math.floor(diff / (1000 * 60)) % 60;
-        const seconds = Math.floor(diff / 1000) % 60;
-        document.getElementById('love-counter').innerText =
-            `${pluralize(days, 'día', 'días')}, ${pluralize(hours, 'hora', 'horas')}, ${pluralize(minutes, 'minuto', 'minutos')} y ${pluralize(seconds, 'segundo', 'segundos')}`;
-    }
-
-    let charIndex = 0;
-    function typeWriter() {
-        if (charIndex < CONFIG.loveText.length) {
-            messageElement.parentElement.style.opacity = 1;
-            messageElement.innerHTML = CONFIG.loveText.substring(0, charIndex + 1).replace(/\n/g, '<br>') + '<span class="cursor"></span>';
-            charIndex++; setTimeout(typeWriter, CONFIG.typingSpeed);
-        } else { messageElement.innerHTML = CONFIG.loveText.replace(/\n/g, '<br>'); }
-    }
-
-    function getPointInHeartShape(width, height) {
-        let t = Math.random() * 2 * Math.PI; let r = Math.sqrt(Math.random());
-        let x = r * (16 * Math.pow(Math.sin(t), 3)); let y = -r * (13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t));
-        return { x: (x / 32 + 0.5) * width, y: (y / 30 + 0.45) * height };
-    }
-
-    function createHeartElement(colorPalette = CONFIG.heartColors) {
-        const heart = document.createElement('div'); const color = colorPalette[Math.floor(Math.random() * colorPalette.length)];
-        const heartSVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="${color}"/></svg>`;
-        heart.style.backgroundImage = `url('data:image/svg+xml;utf8,${encodeURIComponent(heartSVG)}')`;
-        const rotation = Math.random() * 90 - 45; heart.style.setProperty('--rotation', `${rotation}deg`);
-        const swayDelay = Math.random() * 1.5; heart.style.setProperty('--sway-delay', `${swayDelay}s`);
-        return heart;
-    }
-
-    function createCanopyHeart(isFalling = false) {
-        const heart = createHeartElement(); const canopyRect = canopy.getBoundingClientRect();
-        if (canopyRect.width > 0) { const point = getPointInHeartShape(canopyRect.width, canopyRect.height); heart.style.left = `${point.x}px`; heart.style.top = `${point.y}px`; }
-        if (isFalling) { heart.classList.add('heart', 'falling-heart'); heart.style.animationDuration = CONFIG.animation.canopyFallDuration + 's'; heart.style.opacity = '1'; }
-        else { heart.classList.add('heart'); heart.style.animationDuration = CONFIG.animation.initialHeartsAppear + 's'; heart.style.animationDelay = `${Math.random() * CONFIG.animation.initialTreeAppear}s`; }
-        canopy.appendChild(heart);
-        if (isFalling) { setTimeout(() => heart.remove(), CONFIG.animation.canopyFallDuration * 1000); }
-    }
-
-    document.addEventListener('click', function (event) {
-        if (event.target.closest('.carousel-3d, .music-button')) return;
-
-        const phrase = document.createElement('div');
-        phrase.classList.add('floating-phrase');
-        phrase.textContent = CONFIG.clickingPhrases[phraseIndex];
-        phrase.style.left = `${event.clientX}px`;
-        phrase.style.top = `${event.clientY}px`;
-        document.body.appendChild(phrase);
-        phraseIndex = (phraseIndex + 1) % CONFIG.clickingPhrases.length;
-        setTimeout(() => phrase.remove(), 4000);
-
-        for (let i = 0; i < CONFIG.clickBurstCount; i++) {
-            const heart = createHeartElement(); heart.classList.add('click-heart');
-            heart.style.left = `${event.clientX}px`; heart.style.top = `${event.clientY}px`;
-            const angle = Math.random() * 2 * Math.PI;
-            const burstDist = Math.random() * (CONFIG.clickBurst.distance.max - CONFIG.clickBurst.distance.min) + CONFIG.clickBurst.distance.min;
-            const windDist = Math.random() * (CONFIG.clickBurst.wind.max - CONFIG.clickBurst.wind.min) + CONFIG.clickBurst.wind.min;
-            const burstX = Math.cos(angle) * burstDist; const burstY = Math.sin(angle) * burstDist;
-            heart.style.setProperty('--burst-x', `${burstX}px`); heart.style.setProperty('--burst-y', `${burstY}px`);
-            heart.style.setProperty('--wind-x', `${windDist}px`); heart.style.setProperty('--fall-duration', `${CONFIG.animation.clickFallDuration}s`);
-            document.body.appendChild(heart);
-            setTimeout(() => heart.remove(), CONFIG.animation.clickFallDuration * 1000);
-        }
-    });
-
-    function createPetal() {
-        const petal = createHeartElement(CONFIG.petal.colors); petal.classList.add('petal');
-        const startX = Math.random() * 30 - 10; const endX = startX + (Math.random() * 50 + 30);
-        petal.style.setProperty('--start-x', `${startX}vw`); petal.style.setProperty('--end-x', `${endX}vw`);
-        petal.style.left = '0';
-        const duration = Math.random() * (CONFIG.petal.duration.max - CONFIG.petal.duration.min) + CONFIG.petal.duration.min;
-        petal.style.animationDuration = duration + 's'; document.body.appendChild(petal);
-        setTimeout(() => petal.remove(), duration * 1000);
-    }
-
-    function loadHeartsInBatches() {
-        const batchSize = 50; let loaded = 0;
-        function loadBatch() {
-            const remaining = Math.min(batchSize, totalHearts - loaded);
-            for (let i = 0; i < remaining; i++) { createCanopyHeart(); loaded++; }
-            if (loaded < totalHearts) setTimeout(loadBatch, 100);
-        }
-        loadBatch();
-    }
-
-    setTimeout(() => {
-        loadHeartsInBatches();
-        setInterval(() => createCanopyHeart(true), CONFIG.fallingCanopyHeartFrequency);
-        setInterval(createPetal, CONFIG.petal.frequency);
-    }, CONFIG.initialDelay);
-
-    updateCounter(); setInterval(updateCounter, 1000);
-    setTimeout(typeWriter, CONFIG.initialDelay + 2500);
-    initCarousel();
-});
-
-/// Reproductor de Música
+/************************************/
+/*     REPRODUCTOR DE MÚSICA        */
+/************************************/
 class MusicPlayer {
     constructor() {
-        // Usar el elemento audio existente o crear uno nuevo
         this.audio = document.getElementById('hidden-audio') || new Audio();
         this.currentSongIndex = 0;
         this.isPlaying = false;
@@ -227,9 +140,9 @@ class MusicPlayer {
         this.loadSongs();
         this.setupEventListeners();
 
-        // Añadir logs para depuración
-        console.log('MusicPlayer inicializado');
-        console.log('Elemento audio:', this.audio);
+        // Configurar volumen inicial
+        this.audio.volume = this.volume;
+        this.updateVolumeIcon();
     }
 
     initializeElements() {
@@ -255,11 +168,13 @@ class MusicPlayer {
             repeatBtn: document.getElementById('repeat-btn')
         };
 
-        console.log('Elementos inicializados:', this.elements);
+        // Asegurar que el botón siempre sea visible
+        this.elements.musicButton.style.display = 'flex';
+        this.elements.musicButton.style.visibility = 'visible';
+        this.elements.musicButton.style.opacity = '1';
     }
 
     loadSongs() {
-        // Lista de canciones - Asegúrate que las rutas sean correctas
         this.songs = [
             {
                 title: "Recuerdas",
@@ -293,7 +208,6 @@ class MusicPlayer {
             }
         ];
 
-        console.log('Canciones cargadas:', this.songs);
         this.renderPlaylist();
     }
 
@@ -318,7 +232,6 @@ class MusicPlayer {
             `;
 
             songElement.addEventListener('click', () => {
-                console.log('Haciendo clic en canción:', index, song.title);
                 this.playSong(index);
             });
 
@@ -327,36 +240,22 @@ class MusicPlayer {
     }
 
     setupEventListeners() {
-        console.log('Configurando event listeners...');
-
         // Botón de música
-        this.elements.musicButton.addEventListener('click', () => {
-            console.log('Botón de música clickeado');
+        this.elements.musicButton.addEventListener('click', (e) => {
+            e.stopPropagation();
             this.elements.musicPlayer.classList.toggle('show');
-            this.elements.musicButton.classList.toggle('playing', this.isPlaying);
         });
 
         // Cerrar reproductor
-        this.elements.closePlayer.addEventListener('click', () => {
-            console.log('Cerrando reproductor');
+        this.elements.closePlayer.addEventListener('click', (e) => {
+            e.stopPropagation();
             this.elements.musicPlayer.classList.remove('show');
         });
 
         // Controles de reproducción
-        this.elements.playBtn.addEventListener('click', () => {
-            console.log('Botón play/pause clickeado');
-            this.togglePlay();
-        });
-
-        this.elements.prevBtn.addEventListener('click', () => {
-            console.log('Botón anterior clickeado');
-            this.prevSong();
-        });
-
-        this.elements.nextBtn.addEventListener('click', () => {
-            console.log('Botón siguiente clickeado');
-            this.nextSong();
-        });
+        this.elements.playBtn.addEventListener('click', () => this.togglePlay());
+        this.elements.prevBtn.addEventListener('click', () => this.prevSong());
+        this.elements.nextBtn.addEventListener('click', () => this.nextSong());
 
         // Barra de progreso
         this.elements.progressBar.addEventListener('click', (e) => {
@@ -378,52 +277,19 @@ class MusicPlayer {
         this.elements.shuffleBtn.addEventListener('click', () => {
             this.isShuffle = !this.isShuffle;
             this.elements.shuffleBtn.classList.toggle('active', this.isShuffle);
-            console.log('Modo aleatorio:', this.isShuffle);
         });
 
         this.elements.repeatBtn.addEventListener('click', () => {
             this.isRepeat = !this.isRepeat;
             this.elements.repeatBtn.classList.toggle('active', this.isRepeat);
-            console.log('Modo repetir:', this.isRepeat);
         });
 
         // Eventos del audio
         this.audio.addEventListener('timeupdate', () => this.updateProgress());
-
         this.audio.addEventListener('loadedmetadata', () => {
-            console.log('Metadatos cargados, duración:', this.audio.duration);
             this.elements.duration.textContent = this.formatTime(this.audio.duration);
-
-            // Actualizar duración en la lista de reproducción
-            const songItems = document.querySelectorAll('.song-item');
-            if (songItems[this.currentSongIndex]) {
-                songItems[this.currentSongIndex].querySelector('.song-duration').textContent =
-                    this.formatTime(this.audio.duration);
-            }
         });
-
-        this.audio.addEventListener('loadeddata', () => {
-            console.log('Datos de audio cargados');
-        });
-
-        this.audio.addEventListener('canplay', () => {
-            console.log('Audio listo para reproducir');
-        });
-
-        this.audio.addEventListener('play', () => {
-            console.log('Audio empezó a reproducirse');
-            this.isPlaying = true;
-            this.updatePlayButton();
-        });
-
-        this.audio.addEventListener('pause', () => {
-            console.log('Audio pausado');
-            this.isPlaying = false;
-            this.updatePlayButton();
-        });
-
         this.audio.addEventListener('ended', () => {
-            console.log('Audio terminado');
             if (this.isRepeat) {
                 this.playSong(this.currentSongIndex);
             } else {
@@ -431,37 +297,40 @@ class MusicPlayer {
             }
         });
 
-        this.audio.addEventListener('error', (e) => {
-            console.error('Error en audio:', e);
-            console.error('Código de error:', this.audio.error);
-            console.error('Mensaje:', this.audio.error?.message);
-            console.error('SRC actual:', this.audio.src);
+        this.audio.addEventListener('play', () => {
+            this.isPlaying = true;
+            this.updatePlayButton();
+            this.elements.musicButton.classList.add('playing');
         });
 
-        // Configurar volumen inicial
-        this.audio.volume = this.volume;
-        this.elements.volumeSlider.value = this.volume * 100;
-        this.updateVolumeIcon();
+        this.audio.addEventListener('pause', () => {
+            this.isPlaying = false;
+            this.updatePlayButton();
+            this.elements.musicButton.classList.remove('playing');
+        });
 
-        console.log('Event listeners configurados');
+        // Cerrar reproductor si se hace clic fuera de él
+        document.addEventListener('click', (e) => {
+            if (this.elements.musicPlayer.classList.contains('show') &&
+                !this.elements.musicPlayer.contains(e.target) &&
+                !this.elements.musicButton.contains(e.target)) {
+                this.elements.musicPlayer.classList.remove('show');
+            }
+        });
     }
 
     playSong(index) {
-        if (index < 0 || index >= this.songs.length) {
-            console.error('Índice de canción inválido:', index);
-            return;
-        }
+        if (index < 0 || index >= this.songs.length) return;
 
         this.currentSongIndex = index;
         const song = this.songs[index];
 
-        console.log('Intentando reproducir canción:', song.title);
-        console.log('Ruta del archivo:', song.src);
-
-        // Detener audio actual si está reproduciendo
+        // Detener audio actual
         this.audio.pause();
+        this.isPlaying = false;
+        this.updatePlayButton();
 
-        // Limpiar eventos anteriores
+        // Limpiar fuente anterior
         this.audio.src = '';
 
         // Establecer nueva fuente
@@ -479,60 +348,41 @@ class MusicPlayer {
 
         if (playPromise !== undefined) {
             playPromise.then(() => {
-                console.log('Canción empezó a reproducirse correctamente');
                 this.isPlaying = true;
                 this.updatePlayButton();
                 this.renderPlaylist();
                 this.elements.musicButton.classList.add('playing');
             }).catch(error => {
                 console.error("Error al reproducir:", error);
-                console.error("Detalles del error:", {
-                    name: error.name,
-                    message: error.message,
-                    code: this.audio.error?.code,
-                    src: this.audio.src
-                });
 
-                // Mostrar mensaje de error al usuario
+                // Mostrar mensaje de error
                 this.elements.currentSongTitle.textContent = "Error al cargar canción";
-                this.elements.currentSongArtist.textContent = "Verifica la ruta del archivo";
-
-                // Verificar si es un problema de autoplay
-                if (error.name === 'NotAllowedError') {
-                    console.log('Autoplay bloqueado. Necesita interacción del usuario primero.');
-                    this.isPlaying = false;
-                    this.updatePlayButton();
-
-                    // Mostrar mensaje al usuario
-                    alert('Por favor, haz clic en el botón de play para reproducir la música. Los navegadores requieren interacción del usuario para reproducir audio.');
-                }
+                this.elements.currentSongArtist.textContent = "Haz clic en play";
+                this.isPlaying = false;
+                this.updatePlayButton();
+                this.elements.musicButton.classList.remove('playing');
             });
         }
     }
 
     togglePlay() {
-        console.log('togglePlay llamado, isPlaying:', this.isPlaying, 'audio.paused:', this.audio.paused);
-
         if (!this.audio.src) {
-            console.log('No hay fuente de audio, reproduciendo primera canción');
             this.playSong(0);
             return;
         }
 
         if (this.audio.paused) {
-            console.log('Intentando reanudar reproducción');
-            const playPromise = this.audio.play();
-            if (playPromise !== undefined) {
-                playPromise.catch(error => {
-                    console.error('Error al reanudar:', error);
-                    // Si hay error de autoplay, reproducir desde el inicio
-                    if (error.name === 'NotAllowedError') {
-                        this.playSong(this.currentSongIndex);
-                    }
-                });
-            }
+            this.audio.play().then(() => {
+                this.isPlaying = true;
+                this.updatePlayButton();
+                this.elements.musicButton.classList.add('playing');
+            }).catch(error => {
+                console.error("Error al reanudar:", error);
+                if (error.name === 'NotAllowedError') {
+                    this.playSong(this.currentSongIndex);
+                }
+            });
         } else {
-            console.log('Pausando reproducción');
             this.audio.pause();
             this.isPlaying = false;
             this.updatePlayButton();
@@ -544,11 +394,9 @@ class MusicPlayer {
         const icon = this.elements.playIcon;
         icon.classList.remove('fa-play', 'fa-pause');
         icon.classList.add(this.isPlaying ? 'fa-pause' : 'fa-play');
-        console.log('Botón actualizado, isPlaying:', this.isPlaying);
     }
 
     prevSong() {
-        console.log('Cambiando a canción anterior');
         if (this.isShuffle) {
             let newIndex;
             do {
@@ -562,7 +410,6 @@ class MusicPlayer {
     }
 
     nextSong() {
-        console.log('Cambiando a siguiente canción');
         if (this.isShuffle) {
             let newIndex;
             do {
@@ -604,3 +451,295 @@ class MusicPlayer {
         return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
     }
 }
+
+/************************************/
+/*     FUNCIONES AUXILIARES         */
+/************************************/
+function initCarousel() {
+    const carousel = document.getElementById('imageCarousel');
+    if (!carousel) return;
+
+    const items = carousel.querySelectorAll('.carousel-item-3d');
+    let radius, isDragging = false, startX = 0, currentRotation = 0, targetRotation = 0, autoRotateTimeout, animationFrameId;
+    const angle = 360 / items.length;
+
+    const updateRadius = () => {
+        if (window.innerWidth <= 480) { radius = 200; }
+        else if (window.innerWidth <= 850) { radius = 250; }
+        else { radius = 300; }
+    };
+
+    const arrangeItems = () => {
+        updateRadius();
+        items.forEach((item, index) => {
+            item.style.transform = `rotateY(${angle * index}deg) translateZ(${radius}px)`;
+        });
+    };
+
+    const dragStart = (e) => {
+        isDragging = true;
+        startX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
+        carousel.style.transition = 'none';
+    };
+
+    const dragging = (e) => {
+        if (!isDragging) return;
+        const currentX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
+        const diffX = currentX - startX;
+        const sensitivity = window.innerWidth <= 850 ? 0.7 : 0.5;
+        targetRotation = currentRotation + diffX * sensitivity;
+        carousel.style.transform = `rotateY(${targetRotation}deg)`;
+    };
+
+    const dragEnd = () => {
+        if (!isDragging) return;
+        isDragging = false;
+        carousel.style.transition = 'transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+        currentRotation = targetRotation;
+        startAutoRotate();
+    };
+
+    const animateRotation = () => {
+        if (isDragging) {
+            animationFrameId = requestAnimationFrame(animateRotation);
+            return;
+        }
+        const rotationSpeed = 0.2;
+        targetRotation -= rotationSpeed;
+        currentRotation -= rotationSpeed;
+        carousel.style.transform = `rotateY(${targetRotation}deg)`;
+        animationFrameId = requestAnimationFrame(animateRotation);
+    };
+
+    const stopAutoRotate = () => {
+        if (animationFrameId) cancelAnimationFrame(animationFrameId);
+        clearTimeout(autoRotateTimeout);
+    };
+
+    const startAutoRotate = () => {
+        stopAutoRotate();
+        animationFrameId = requestAnimationFrame(animateRotation);
+    };
+
+    carousel.addEventListener('mousedown', dragStart);
+    document.addEventListener('mousemove', dragging);
+    document.addEventListener('mouseup', dragEnd);
+    carousel.addEventListener('touchstart', dragStart, { passive: true });
+    carousel.addEventListener('touchmove', dragging, { passive: true });
+    carousel.addEventListener('touchend', dragEnd);
+
+    arrangeItems();
+    startAutoRotate();
+    window.addEventListener('resize', arrangeItems);
+}
+
+function pluralize(value, singular, plural) {
+    return `${value} ${value === 1 ? singular : plural}`;
+}
+
+function getPointInHeartShape(width, height) {
+    let t = Math.random() * 2 * Math.PI;
+    let r = Math.sqrt(Math.random());
+    let x = r * (16 * Math.pow(Math.sin(t), 3));
+    let y = -r * (13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t));
+    return { x: (x / 32 + 0.5) * width, y: (y / 30 + 0.45) * height };
+}
+
+function createHeartElement(colorPalette = CONFIG.heartColors) {
+    const heart = document.createElement('div');
+    const color = colorPalette[Math.floor(Math.random() * colorPalette.length)];
+    const heartSVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="${color}"/></svg>`;
+    heart.style.backgroundImage = `url('data:image/svg+xml;utf8,${encodeURIComponent(heartSVG)}')`;
+    const rotation = Math.random() * 90 - 45;
+    heart.style.setProperty('--rotation', `${rotation}deg`);
+    const swayDelay = Math.random() * 1.5;
+    heart.style.setProperty('--sway-delay', `${swayDelay}s`);
+    return heart;
+}
+
+/************************************/
+/*     INICIALIZACIÓN PRINCIPAL     */
+/************************************/
+document.addEventListener('DOMContentLoaded', function () {
+    // 1. Inicializar pantalla de carga
+    const loadingSystem = new LoadingSystem();
+    window.loadingSystem = loadingSystem;
+
+    // 2. Variables principales
+    const canopy = document.querySelector('.heart-canopy');
+    const messageElement = document.getElementById('love-message-text');
+    const totalHearts = window.innerWidth <= 768 ? CONFIG.canopyHeartCount.mobile : CONFIG.canopyHeartCount.desktop;
+    const startDate = new Date(CONFIG.startDate);
+    let phraseIndex = 0;
+
+    // 3. Función para actualizar contador
+    function updateCounter() {
+        const now = new Date();
+        const diff = now - startDate;
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor(diff / (1000 * 60 * 60)) % 24;
+        const minutes = Math.floor(diff / (1000 * 60)) % 60;
+        const seconds = Math.floor(diff / 1000) % 60;
+        document.getElementById('love-counter').innerText =
+            `${pluralize(days, 'día', 'días')}, ${pluralize(hours, 'hora', 'horas')}, ${pluralize(minutes, 'minuto', 'minutos')} y ${pluralize(seconds, 'segundo', 'segundos')}`;
+    }
+
+    // 4. Función para escribir el mensaje
+    let charIndex = 0;
+    function typeWriter() {
+        if (charIndex < CONFIG.loveText.length) {
+            messageElement.parentElement.style.opacity = 1;
+            messageElement.innerHTML = CONFIG.loveText.substring(0, charIndex + 1).replace(/\n/g, '<br>') + '<span class="cursor"></span>';
+            charIndex++;
+            setTimeout(typeWriter, CONFIG.typingSpeed);
+        } else {
+            messageElement.innerHTML = CONFIG.loveText.replace(/\n/g, '<br>');
+        }
+    }
+
+    // 5. Función para crear corazón del dosel
+    function createCanopyHeart(isFalling = false) {
+        const heart = createHeartElement();
+        const canopyRect = canopy.getBoundingClientRect();
+        if (canopyRect.width > 0) {
+            const point = getPointInHeartShape(canopyRect.width, canopyRect.height);
+            heart.style.left = `${point.x}px`;
+            heart.style.top = `${point.y}px`;
+        }
+        if (isFalling) {
+            heart.classList.add('heart', 'falling-heart');
+            heart.style.animationDuration = CONFIG.animation.canopyFallDuration + 's';
+            heart.style.opacity = '1';
+        } else {
+            heart.classList.add('heart');
+            heart.style.animationDuration = CONFIG.animation.initialHeartsAppear + 's';
+            heart.style.animationDelay = `${Math.random() * CONFIG.animation.initialTreeAppear}s`;
+        }
+        canopy.appendChild(heart);
+        if (isFalling) {
+            setTimeout(() => heart.remove(), CONFIG.animation.canopyFallDuration * 1000);
+        }
+    }
+
+    // 6. Función para crear pétalo
+    function createPetal() {
+        const petal = createHeartElement(CONFIG.petal.colors);
+        petal.classList.add('petal');
+        const startX = Math.random() * 30 - 10;
+        const endX = startX + (Math.random() * 50 + 30);
+        petal.style.setProperty('--start-x', `${startX}vw`);
+        petal.style.setProperty('--end-x', `${endX}vw`);
+        petal.style.left = '0';
+        const duration = Math.random() * (CONFIG.petal.duration.max - CONFIG.petal.duration.min) + CONFIG.petal.duration.min;
+        petal.style.animationDuration = duration + 's';
+        document.body.appendChild(petal);
+        setTimeout(() => petal.remove(), duration * 1000);
+    }
+
+    // 7. Función para cargar corazones en lotes
+    function loadHeartsInBatches() {
+        const batchSize = 50;
+        let loaded = 0;
+
+        function loadBatch() {
+            const remaining = Math.min(batchSize, totalHearts - loaded);
+            for (let i = 0; i < remaining; i++) {
+                createCanopyHeart();
+                loaded++;
+            }
+
+            if (loaded < totalHearts) {
+                // Actualizar progreso según los corazones cargados
+                const progress = 70 + (loaded / totalHearts) * 10;
+                loadingSystem.updateProgress(Math.min(progress, 80), `Cargando corazones... ${loaded}/${totalHearts}`);
+                setTimeout(loadBatch, 50);
+            } else {
+                loadingSystem.updateProgress(80, "Corazones cargados!");
+            }
+        }
+        loadBatch();
+    }
+
+    // 8. Evento de clic para frases y corazones
+    document.addEventListener('click', function (event) {
+        if (event.target.closest('.carousel-3d, .music-button')) return;
+
+        // Crear frase flotante
+        const phrase = document.createElement('div');
+        phrase.classList.add('floating-phrase');
+        phrase.textContent = CONFIG.clickingPhrases[phraseIndex];
+        phrase.style.left = `${event.clientX}px`;
+        phrase.style.top = `${event.clientY}px`;
+        document.body.appendChild(phrase);
+        phraseIndex = (phraseIndex + 1) % CONFIG.clickingPhrases.length;
+        setTimeout(() => phrase.remove(), 4000);
+
+        // Crear explosión de corazones
+        for (let i = 0; i < CONFIG.clickBurstCount; i++) {
+            const heart = createHeartElement();
+            heart.classList.add('click-heart');
+            heart.style.left = `${event.clientX}px`;
+            heart.style.top = `${event.clientY}px`;
+            const angle = Math.random() * 2 * Math.PI;
+            const burstDist = Math.random() * (CONFIG.clickBurst.distance.max - CONFIG.clickBurst.distance.min) + CONFIG.clickBurst.distance.min;
+            const windDist = Math.random() * (CONFIG.clickBurst.wind.max - CONFIG.clickBurst.wind.min) + CONFIG.clickBurst.wind.min;
+            const burstX = Math.cos(angle) * burstDist;
+            const burstY = Math.sin(angle) * burstDist;
+            heart.style.setProperty('--burst-x', `${burstX}px`);
+            heart.style.setProperty('--burst-y', `${burstY}px`);
+            heart.style.setProperty('--wind-x', `${windDist}px`);
+            heart.style.setProperty('--fall-duration', `${CONFIG.animation.clickFallDuration}s`);
+            document.body.appendChild(heart);
+            setTimeout(() => heart.remove(), CONFIG.animation.clickFallDuration * 1000);
+        }
+    });
+
+    // 9. SECUENCIA DE CARGA (en orden correcto)
+
+    // Paso 1: Inicialización básica (0-10%)
+    setTimeout(() => loadingSystem.updateProgress(10, "Cargando corazones..."), 300);
+
+    // Paso 2: Preparar elementos visuales (10-30%)
+    setTimeout(() => loadingSystem.updateProgress(30, "Preparando árbol especial..."), 800);
+
+    // Paso 3: Inicializar reproductor de música (30-50%)
+    setTimeout(() => {
+        loadingSystem.updateProgress(50, "Configurando música...");
+        const musicPlayer = new MusicPlayer();
+        window.musicPlayer = musicPlayer;
+    }, 1200);
+
+    // Paso 4: Cargar corazones y efectos (50-70%)
+    setTimeout(() => {
+        loadingSystem.updateProgress(70, "Cargando recuerdos...");
+
+        // Iniciar carrusel
+        initCarousel();
+
+        // Cargar corazones en lotes
+        loadHeartsInBatches();
+
+        // Iniciar efectos continuos
+        setInterval(() => createCanopyHeart(true), CONFIG.fallingCanopyHeartFrequency);
+        setInterval(createPetal, CONFIG.petal.frequency);
+    }, CONFIG.initialDelay);
+
+    // Paso 5: Iniciar contador y mensaje (70-90%)
+    updateCounter();
+    setInterval(updateCounter, 1000);
+
+    setTimeout(() => {
+        loadingSystem.updateProgress(90, "Preparando mensaje especial...");
+        typeWriter();
+    }, CONFIG.initialDelay + 2500);
+
+    // Paso 6: Finalizar carga (90-100%)
+    setTimeout(() => {
+        loadingSystem.updateProgress(100, "¡Todo listo!");
+    }, CONFIG.initialDelay + 3500);
+
+    // Evento para interacción con audio
+    document.addEventListener('click', function initAudioOnInteraction() {
+        document.removeEventListener('click', initAudioOnInteraction);
+    }, { once: true });
+});
