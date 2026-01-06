@@ -100,9 +100,17 @@ document.addEventListener('DOMContentLoaded', function () {
     console.log('startDate (ISO):', startDate.toISOString());
     console.log('Ahora (toString):', new Date().toString());
     let phraseIndex = 0;
-
+    console.log('Inicializando MusicPlayer...');
+    const musicPlayer = new MusicPlayer();
     // new MusicSystem();
+    window.musicPlayer = musicPlayer;
+    console.log('MusicPlayer disponible en window.musicPlayer');
 
+    // Añadir evento para cargar automáticamente la primera canción cuando el usuario interactúe
+    document.addEventListener('click', function initAudioOnInteraction() {
+        console.log('Interacción del usuario detectada');
+        document.removeEventListener('click', initAudioOnInteraction);
+    }, { once: true });
     function pluralize(value, singular, plural) { return `${value} ${value === 1 ? singular : plural}`; }
 
     function updateCounter() {
@@ -203,10 +211,11 @@ document.addEventListener('DOMContentLoaded', function () {
     initCarousel();
 });
 
-// Reproductor de Música
+/// Reproductor de Música
 class MusicPlayer {
     constructor() {
-        this.audio = new Audio();
+        // Usar el elemento audio existente o crear uno nuevo
+        this.audio = document.getElementById('hidden-audio') || new Audio();
         this.currentSongIndex = 0;
         this.isPlaying = false;
         this.isShuffle = false;
@@ -217,6 +226,10 @@ class MusicPlayer {
         this.initializeElements();
         this.loadSongs();
         this.setupEventListeners();
+
+        // Añadir logs para depuración
+        console.log('MusicPlayer inicializado');
+        console.log('Elemento audio:', this.audio);
     }
 
     initializeElements() {
@@ -241,44 +254,46 @@ class MusicPlayer {
             shuffleBtn: document.getElementById('shuffle-btn'),
             repeatBtn: document.getElementById('repeat-btn')
         };
+
+        console.log('Elementos inicializados:', this.elements);
     }
 
     loadSongs() {
-        // Lista de canciones en la carpeta assets/music/
-        // Asegúrate de tener estas canciones en tu proyecto
+        // Lista de canciones - Asegúrate que las rutas sean correctas
         this.songs = [
             {
                 title: "Recuerdas",
                 artist: "Esta canción?",
-                src: "assets/music/song2.mp3",
+                src: "assets/songs/song2.mp3",
                 cover: "assets/images/music0.jpg"
             },
             {
                 title: "Eres la mejor",
                 artist: "Mi amor hermosa",
-                src: "assets/music/song1.mp3",
+                src: "assets/songs/song1.mp3",
                 cover: "assets/images/music3.jpg"
             },
             {
                 title: "Te amo",
                 artist: "Eternamente",
-                src: "assets/music/song3.mp3",
+                src: "assets/songs/song3.mp3",
                 cover: "assets/images/music2.jpg"
             },
             {
                 title: "Hiciste de mi vida",
                 artist: "la mejor",
-                src: "assets/music/song4.mp3",
+                src: "assets/songs/song4.mp3",
                 cover: "assets/images/music4.jpg"
             },
             {
                 title: "Mi amor chiquita",
                 artist: "Siempre mi princesa",
-                src: "assets/music/song5.mp3",
+                src: "assets/songs/song5.mp3",
                 cover: "assets/images/music5.jpg"
             }
         ];
 
+        console.log('Canciones cargadas:', this.songs);
         this.renderPlaylist();
     }
 
@@ -299,10 +314,11 @@ class MusicPlayer {
                     <h4>${song.title}</h4>
                     <p>${song.artist}</p>
                 </div>
-                <div class="song-duration">3:45</div>
+                <div class="song-duration">-:--</div>
             `;
 
             songElement.addEventListener('click', () => {
+                console.log('Haciendo clic en canción:', index, song.title);
                 this.playSong(index);
             });
 
@@ -311,27 +327,44 @@ class MusicPlayer {
     }
 
     setupEventListeners() {
+        console.log('Configurando event listeners...');
+
         // Botón de música
         this.elements.musicButton.addEventListener('click', () => {
+            console.log('Botón de música clickeado');
             this.elements.musicPlayer.classList.toggle('show');
             this.elements.musicButton.classList.toggle('playing', this.isPlaying);
         });
 
         // Cerrar reproductor
         this.elements.closePlayer.addEventListener('click', () => {
+            console.log('Cerrando reproductor');
             this.elements.musicPlayer.classList.remove('show');
         });
 
         // Controles de reproducción
-        this.elements.playBtn.addEventListener('click', () => this.togglePlay());
-        this.elements.prevBtn.addEventListener('click', () => this.prevSong());
-        this.elements.nextBtn.addEventListener('click', () => this.nextSong());
+        this.elements.playBtn.addEventListener('click', () => {
+            console.log('Botón play/pause clickeado');
+            this.togglePlay();
+        });
+
+        this.elements.prevBtn.addEventListener('click', () => {
+            console.log('Botón anterior clickeado');
+            this.prevSong();
+        });
+
+        this.elements.nextBtn.addEventListener('click', () => {
+            console.log('Botón siguiente clickeado');
+            this.nextSong();
+        });
 
         // Barra de progreso
         this.elements.progressBar.addEventListener('click', (e) => {
-            const rect = this.elements.progressBar.getBoundingClientRect();
-            const percent = (e.clientX - rect.left) / rect.width;
-            this.audio.currentTime = percent * this.audio.duration;
+            if (this.audio.duration) {
+                const rect = this.elements.progressBar.getBoundingClientRect();
+                const percent = (e.clientX - rect.left) / rect.width;
+                this.audio.currentTime = percent * this.audio.duration;
+            }
         });
 
         // Volumen
@@ -345,19 +378,52 @@ class MusicPlayer {
         this.elements.shuffleBtn.addEventListener('click', () => {
             this.isShuffle = !this.isShuffle;
             this.elements.shuffleBtn.classList.toggle('active', this.isShuffle);
+            console.log('Modo aleatorio:', this.isShuffle);
         });
 
         this.elements.repeatBtn.addEventListener('click', () => {
             this.isRepeat = !this.isRepeat;
             this.elements.repeatBtn.classList.toggle('active', this.isRepeat);
+            console.log('Modo repetir:', this.isRepeat);
         });
 
         // Eventos del audio
         this.audio.addEventListener('timeupdate', () => this.updateProgress());
+
         this.audio.addEventListener('loadedmetadata', () => {
+            console.log('Metadatos cargados, duración:', this.audio.duration);
             this.elements.duration.textContent = this.formatTime(this.audio.duration);
+
+            // Actualizar duración en la lista de reproducción
+            const songItems = document.querySelectorAll('.song-item');
+            if (songItems[this.currentSongIndex]) {
+                songItems[this.currentSongIndex].querySelector('.song-duration').textContent =
+                    this.formatTime(this.audio.duration);
+            }
         });
+
+        this.audio.addEventListener('loadeddata', () => {
+            console.log('Datos de audio cargados');
+        });
+
+        this.audio.addEventListener('canplay', () => {
+            console.log('Audio listo para reproducir');
+        });
+
+        this.audio.addEventListener('play', () => {
+            console.log('Audio empezó a reproducirse');
+            this.isPlaying = true;
+            this.updatePlayButton();
+        });
+
+        this.audio.addEventListener('pause', () => {
+            console.log('Audio pausado');
+            this.isPlaying = false;
+            this.updatePlayButton();
+        });
+
         this.audio.addEventListener('ended', () => {
+            console.log('Audio terminado');
             if (this.isRepeat) {
                 this.playSong(this.currentSongIndex);
             } else {
@@ -365,43 +431,112 @@ class MusicPlayer {
             }
         });
 
+        this.audio.addEventListener('error', (e) => {
+            console.error('Error en audio:', e);
+            console.error('Código de error:', this.audio.error);
+            console.error('Mensaje:', this.audio.error?.message);
+            console.error('SRC actual:', this.audio.src);
+        });
+
         // Configurar volumen inicial
         this.audio.volume = this.volume;
         this.elements.volumeSlider.value = this.volume * 100;
+        this.updateVolumeIcon();
+
+        console.log('Event listeners configurados');
     }
 
     playSong(index) {
-        if (index < 0 || index >= this.songs.length) return;
+        if (index < 0 || index >= this.songs.length) {
+            console.error('Índice de canción inválido:', index);
+            return;
+        }
 
         this.currentSongIndex = index;
         const song = this.songs[index];
 
+        console.log('Intentando reproducir canción:', song.title);
+        console.log('Ruta del archivo:', song.src);
+
+        // Detener audio actual si está reproduciendo
+        this.audio.pause();
+
+        // Limpiar eventos anteriores
+        this.audio.src = '';
+
+        // Establecer nueva fuente
         this.audio.src = song.src;
         this.elements.currentSongTitle.textContent = song.title;
         this.elements.currentSongArtist.textContent = song.artist;
 
-        this.audio.play().then(() => {
-            this.isPlaying = true;
-            this.updatePlayButton();
-            this.renderPlaylist();
-            this.elements.musicButton.classList.add('playing');
-        }).catch(error => {
-            console.error("Error al reproducir:", error);
-        });
+        // Reiniciar progreso
+        this.elements.progress.style.width = '0%';
+        this.elements.currentTime.textContent = '0:00';
+        this.elements.duration.textContent = '0:00';
+
+        // Intentar reproducir
+        const playPromise = this.audio.play();
+
+        if (playPromise !== undefined) {
+            playPromise.then(() => {
+                console.log('Canción empezó a reproducirse correctamente');
+                this.isPlaying = true;
+                this.updatePlayButton();
+                this.renderPlaylist();
+                this.elements.musicButton.classList.add('playing');
+            }).catch(error => {
+                console.error("Error al reproducir:", error);
+                console.error("Detalles del error:", {
+                    name: error.name,
+                    message: error.message,
+                    code: this.audio.error?.code,
+                    src: this.audio.src
+                });
+
+                // Mostrar mensaje de error al usuario
+                this.elements.currentSongTitle.textContent = "Error al cargar canción";
+                this.elements.currentSongArtist.textContent = "Verifica la ruta del archivo";
+
+                // Verificar si es un problema de autoplay
+                if (error.name === 'NotAllowedError') {
+                    console.log('Autoplay bloqueado. Necesita interacción del usuario primero.');
+                    this.isPlaying = false;
+                    this.updatePlayButton();
+
+                    // Mostrar mensaje al usuario
+                    alert('Por favor, haz clic en el botón de play para reproducir la música. Los navegadores requieren interacción del usuario para reproducir audio.');
+                }
+            });
+        }
     }
 
     togglePlay() {
-        if (this.audio.src) {
-            if (this.isPlaying) {
-                this.audio.pause();
-            } else {
-                this.audio.play();
-            }
-            this.isPlaying = !this.isPlaying;
-            this.updatePlayButton();
-            this.elements.musicButton.classList.toggle('playing', this.isPlaying);
-        } else if (this.songs.length > 0) {
+        console.log('togglePlay llamado, isPlaying:', this.isPlaying, 'audio.paused:', this.audio.paused);
+
+        if (!this.audio.src) {
+            console.log('No hay fuente de audio, reproduciendo primera canción');
             this.playSong(0);
+            return;
+        }
+
+        if (this.audio.paused) {
+            console.log('Intentando reanudar reproducción');
+            const playPromise = this.audio.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(error => {
+                    console.error('Error al reanudar:', error);
+                    // Si hay error de autoplay, reproducir desde el inicio
+                    if (error.name === 'NotAllowedError') {
+                        this.playSong(this.currentSongIndex);
+                    }
+                });
+            }
+        } else {
+            console.log('Pausando reproducción');
+            this.audio.pause();
+            this.isPlaying = false;
+            this.updatePlayButton();
+            this.elements.musicButton.classList.remove('playing');
         }
     }
 
@@ -409,9 +544,11 @@ class MusicPlayer {
         const icon = this.elements.playIcon;
         icon.classList.remove('fa-play', 'fa-pause');
         icon.classList.add(this.isPlaying ? 'fa-pause' : 'fa-play');
+        console.log('Botón actualizado, isPlaying:', this.isPlaying);
     }
 
     prevSong() {
+        console.log('Cambiando a canción anterior');
         if (this.isShuffle) {
             let newIndex;
             do {
@@ -425,6 +562,7 @@ class MusicPlayer {
     }
 
     nextSong() {
+        console.log('Cambiando a siguiente canción');
         if (this.isShuffle) {
             let newIndex;
             do {
@@ -438,7 +576,7 @@ class MusicPlayer {
     }
 
     updateProgress() {
-        if (!isNaN(this.audio.duration)) {
+        if (this.audio.duration && !isNaN(this.audio.duration)) {
             const progress = (this.audio.currentTime / this.audio.duration) * 100;
             this.elements.progress.style.width = `${progress}%`;
             this.elements.currentTime.textContent = this.formatTime(this.audio.currentTime);
@@ -447,7 +585,7 @@ class MusicPlayer {
 
     updateVolumeIcon() {
         const icon = this.elements.volumeIcon;
-        icon.classList.remove('fa-volume-up', 'fa-volume-down', 'fa-volume-mute', 'fa-volume-off');
+        icon.classList.remove('fa-volume-up', 'fa-volume-down', 'fa-volume-mute');
 
         if (this.volume === 0) {
             icon.classList.add('fa-volume-mute');
@@ -459,19 +597,10 @@ class MusicPlayer {
     }
 
     formatTime(seconds) {
+        if (isNaN(seconds)) return "0:00";
+
         const mins = Math.floor(seconds / 60);
         const secs = Math.floor(seconds % 60);
         return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
     }
 }
-
-// Inicializar el reproductor cuando se cargue la página
-document.addEventListener('DOMContentLoaded', () => {
-    // Tu código existente aquí...
-
-    // Agregar el reproductor de música
-    const musicPlayer = new MusicPlayer();
-
-    // Para acceder desde la consola si es necesario
-    window.musicPlayer = musicPlayer;
-});
