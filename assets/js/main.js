@@ -5,17 +5,62 @@ const CONFIG = {
     startDate: '2025-09-06T19:30:00-05:00',
 
     // MENSAJE CAMBIADO Y GENERALIZADO
-    loveText: `Hola, mi amor... ✨\nSolo quería recordarte lo especial que eres para mí y celebrar cada segundo que hemos compartido. Nuestro tiempo juntos ha sido un regalo maravilloso, lleno de risas, sueños y momentos que guardaré por siempre en mi corazón. ❤️\n\nCada día a tu lado es una nueva aventura y una razón para sonreír. Eres la luz que ilumina mis días. Gracias por tanto amor. ¡Te quiero muchísimo! 🥰`,
+    loveText: `Hola, mi amor… ✨
 
+Quería decirte, desde lo más profundo de mi corazón, que te amo. ❤️  
+Que lo mejor que me dejó el 2025 fue encontrarte, y lo más bonito del 2026 es empezarlo y vivirlo a tu lado, construyendo esta nueva vida juntos.
+
+Cada día te amo más, de una forma que no sabía que era posible. Llegaste cuando todo era ruido y caos, y sin darte cuenta fuiste paz, fuiste refugio, fuiste salvación. 🌿  
+Me enseñaste a amar de una manera única, sincera, sin miedos, sin máscaras… con el alma.
+
+Gracias por ser luz en mis días oscuros, calma en mis tormentas y hogar en cada abrazo. Gracias por quedarte, por creer, por amar.  
+Caminar contigo es el regalo más grande que la vida me ha dado.
+
+Te amo hoy, te amo mañana y te amo en cada paso que demos juntos. 💖✨
+
+🌹FELICES 4 MESES MI AMOR😍`,
     // FRASES CAMBIADAS Y GENERALIZADAS
     clickingPhrases: [
-        "Te quiero ❤️",
-        "Eres mi persona favorita ✨",
-        "Cada día te elijo a ti 🥰",
-        "Juntos es mi lugar feliz 💖",
-        "Gracias por existir 🌹",
-        "Contigo todo es mejor 😊",
-        "Mi corazón es tuyo 💘"
+        "Mi chiquita hermosa 💕",
+        "Princesa preciosa 👑💖",
+        "Mi gordita linda 😍",
+        "Eres la más hermosa del mundo 🌸✨",
+        "Mi amor eterno 💞",
+        "Amor infinito ♾️❤️",
+        "Mi princesa preciosa 👑🌹",
+        "Chiquita consentida 🧸💖",
+        "Mi vida bonita 🌷❤️",
+        "Eres un sueño hecho realidad 🌙✨",
+        "Mi corazón es tuyo ❤️‍🔥",
+        "Belleza que enamora 🌹💖",
+        "Mi niña hermosa 💕",
+        "Reina bella 👑✨",
+        "Mi amorcito lindo 💗",
+        "Pedacito de cielo ☁️💞",
+        "Mi princesa soñada ✨👑",
+        "Eres todo lo que siempre quise 💘",
+        "Mi tesoro más valioso 💎❤️",
+        "Gordita preciosa 😘💗",
+        "Mi razón de sonreír 😊💖",
+        "La luz que ilumina mis días 🌟❤️",
+        "Mi chiquita del alma 🫶💞",
+        "Mi amor verdadero 💍❤️",
+        "Mi bebé preciosa 🥰",
+        "Niña bonita de mis ojos🌸💗",
+        "Mi felicidad 🌈❤️",
+        "La princesa de mi cuentos ✨👑",
+        "Mi amor infinito y sincero 🔒💖",
+        "Sonrisa que enamora 😊💓",
+        "Mi reina hermosa 👑🌹",
+        "Eres lo mejor que me pasó 💝",
+        "Mi vida entera 💘",
+        "Amor bonito 🌺💞",
+        "Mi chiquita linda 🧸❤️",
+        "Con tu belleza única ✨💖",
+        "El amor de mi vida 💕",
+        "Eres mi lugar seguro 🏡❤️",
+        "Mi princesa bella 💫👑",
+        "Todo en ti es perfecto 💖✨"
     ],
 
     heartColors: ['#ff6b6b', '#ffa07a', '#ffc3a0', '#f0932b', '#e84393', '#d14a7e', '#ff7979', '#ff4757', '#e056fd'],
@@ -28,7 +73,6 @@ const CONFIG = {
     initialDelay: 800,
     typingSpeed: 45,
 
-    // Configuración de la pantalla de carga
     loading: {
         minDisplayTime: 3000,
         progressSteps: [
