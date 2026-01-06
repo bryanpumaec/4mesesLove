@@ -30,32 +30,32 @@ const CONFIG = {
     typingSpeed: 45, // Un poco más lento para la nueva fuente
 };
 
-class MusicSystem {
-    constructor() {
-        this.audio = null; this.isPlaying = false; this.clickCount = 0;
-        this.button = document.getElementById('music-button'); this.init();
-    }
-    init() {
-        this.button.addEventListener('click', () => this.toggleMusic());
-        document.addEventListener('click', () => this.handleFirstClick());
-        document.addEventListener('touchstart', () => this.handleFirstClick());
-    }
-    async handleFirstClick() {
-        this.clickCount++; if (this.clickCount === 1) await this.initAudio();
-    }
-    async initAudio() {
-        try {
-            this.audio = new Audio('https://www.dl.dropboxusercontent.com/scl/fi/9aprlwe70zexkb95bfmfx/sound.mp3?rlkey=o3hfblu0a5pr5fv2yr57sydq7&st=ssqwqt3h'); this.audio.loop = true; this.audio.volume = 0.7; this.audio.preload = 'auto';
-            this.audio.addEventListener('error', (e) => { this.button.style.display = 'none'; });
-            setTimeout(() => { this.playMusic(); }, 1000);
-        } catch (error) { this.button.style.display = 'none'; }
-    }
-    async toggleMusic() { if (this.isPlaying) this.pauseMusic(); else await this.playMusic(); }
-    async playMusic() {
-        if (!this.audio) return; try { await this.audio.play(); this.isPlaying = true; this.button.textContent = '🎵'; this.button.classList.add('playing'); } catch (error) { }
-    }
-    pauseMusic() { if (!this.audio) return; this.audio.pause(); this.isPlaying = false; this.button.textContent = '🎵'; this.button.classList.remove('playing'); }
-}
+// class MusicSystem {
+//     constructor() {
+//         this.audio = null; this.isPlaying = false; this.clickCount = 0;
+//         this.button = document.getElementById('music-button'); this.init();
+//     }
+//     init() {
+//         this.button.addEventListener('click', () => this.toggleMusic());
+//         document.addEventListener('click', () => this.handleFirstClick());
+//         document.addEventListener('touchstart', () => this.handleFirstClick());
+//     }
+//     async handleFirstClick() {
+//         this.clickCount++; if (this.clickCount === 1) await this.initAudio();
+//     }
+//     async initAudio() {
+//         try {
+//             this.audio = new Audio('https://www.dl.dropboxusercontent.com/scl/fi/9aprlwe70zexkb95bfmfx/sound.mp3?rlkey=o3hfblu0a5pr5fv2yr57sydq7&st=ssqwqt3h'); this.audio.loop = true; this.audio.volume = 0.7; this.audio.preload = 'auto';
+//             this.audio.addEventListener('error', (e) => { this.button.style.display = 'none'; });
+//             setTimeout(() => { this.playMusic(); }, 1000);
+//         } catch (error) { this.button.style.display = 'none'; }
+//     }
+//     async toggleMusic() { if (this.isPlaying) this.pauseMusic(); else await this.playMusic(); }
+//     async playMusic() {
+//         if (!this.audio) return; try { await this.audio.play(); this.isPlaying = true; this.button.textContent = '🎵'; this.button.classList.add('playing'); } catch (error) { }
+//     }
+//     pauseMusic() { if (!this.audio) return; this.audio.pause(); this.isPlaying = false; this.button.textContent = '🎵'; this.button.classList.remove('playing'); }
+// }
 
 function initCarousel() {
     const carousel = document.getElementById('imageCarousel'); if (!carousel) return;
@@ -101,7 +101,7 @@ document.addEventListener('DOMContentLoaded', function () {
     console.log('Ahora (toString):', new Date().toString());
     let phraseIndex = 0;
 
-    new MusicSystem();
+    // new MusicSystem();
 
     function pluralize(value, singular, plural) { return `${value} ${value === 1 ? singular : plural}`; }
 
