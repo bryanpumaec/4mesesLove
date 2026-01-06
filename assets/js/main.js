@@ -780,10 +780,20 @@ document.addEventListener('DOMContentLoaded', function () {
     // Paso 6: Finalizar carga (90-100%)
     setTimeout(() => {
         loadingSystem.updateProgress(100, "¡Todo listo!");
+        window.appReadyForMusic = true;
     }, CONFIG.initialDelay + 3500);
 
     // Evento para interacción con audio
     document.addEventListener('click', function initAudioOnInteraction() {
         document.removeEventListener('click', initAudioOnInteraction);
     }, { once: true });
+
+    document.addEventListener('click', function firstTapToPlayMusic() {
+    if (!window.appReadyForMusic) return;
+    if (!window.musicPlayer) return;
+
+    window.musicPlayer.playSong(0);
+
+    document.removeEventListener('click', firstTapToPlayMusic);
+}, { passive: true });
 });
